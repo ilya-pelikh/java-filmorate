@@ -1,70 +1,79 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Friendship;
+import ru.yandex.practicum.filmorate.service.FriendshipService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validation.ValidationGroups;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
-
-    private boolean getHasUserName(User user) {
-        return !(user.getName() == null || user.getName().isBlank());
-    }
+    private final UserService userService;
+    private final FriendshipService friendshipService;
 
     @GetMapping
-    public Collection<User> get() {
-        return users.values();
+    public Collection<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping(path = "/{id}")
+    public User getUserById(@PathVariable long id) {
+        return userService.getUserById(id);
     }
 
     @PostMapping
-    public User add(@Valid @RequestBody User user) {
-        if (!getHasUserName(user)) {
-            user.setName(user.getLogin());
-        }
+    public User addUser(@Valid @RequestBody User user) {
+        User addedUser = userService.addUser(user);
 
-        long id = getNextId();
-        user.setId(id);
-        users.put(id, user);
-        log.trace("Добавление пользователя{}->{}", users.get(id), user);
+        log.trace("Добавление пользователя{}->{}", addedUser.getId(), user);
 
         return user;
     }
 
     @PutMapping
-    public User update(@Validated(ValidationGroups.OnUpdate.class) @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователя с данный id не сущесуствует");
-        }
+    public User updateUser(@Validated(ValidationGroups.OnUpdate.class) @RequestBody User user) {
+        User editedUser = userService.editUser(user.getId(), user);
 
-        if (!getHasUserName(user)) {
-            user.setName(user.getLogin());
-        }
-
-        long id = user.getId();
-
-        log.trace("Обновление пользователя{}->{}", users.get(id), user);
-        users.put(id, user);
+        log.trace("Обновление пользователя{}->{}", editedUser.getId(), user);
 
         return user;
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping(path = "/{userId}/friends/{friendId}")
+    public Friendship addLikeToFilmByUser(@PathVariable long userId, @PathVariable long friendId) {
+        Friendship friendship = friendshipService.addUserToFriends(userId, friendId);
+
+        log.trace("Добавление лайка {}->{}", userId, friendship.getId());
+
+        return friendship;
+    }
+
+    @DeleteMapping(path = "/{userId}/friends/{friendId}")
+    public Friendship removeLikeFromFilmByUser(@PathVariable long userId, @PathVariable long friendId) {
+        Friendship friendship = friendshipService.removeUserFromFriends(userId, friendId);
+
+        log.trace("Удаление лайка {}->{}", userId, friendship.getId());
+
+        return friendship;
+    }
+
+    @GetMapping(path = "/{userId}/friends")
+    public Collection<User> getUserFriendsByUserId(@PathVariable long userId) {
+        return friendshipService.getFriendsByUserId(userId);
+    }
+
+    @GetMapping(path = "{userId}/friends/common/{friendId}")
+    public Collection<User> getCommonUserFriendsByUserId(@PathVariable long userId, @PathVariable long friendId) {
+        return friendshipService.getCommonUserFriendsByUserId(userId, friendId);
     }
 }
