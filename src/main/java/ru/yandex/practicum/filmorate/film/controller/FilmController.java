@@ -7,11 +7,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.common.validation.ValidationGroups;
-import ru.yandex.practicum.filmorate.film.domain.Film;
 import ru.yandex.practicum.filmorate.film.dto.FilmRequestDto;
 import ru.yandex.practicum.filmorate.film.dto.FilmResponseDto;
 import ru.yandex.practicum.filmorate.film.dto.GenreResponseDto;
 import ru.yandex.practicum.filmorate.film.dto.MPAResponseDto;
+import ru.yandex.practicum.filmorate.film.entity.Film;
 import ru.yandex.practicum.filmorate.film.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.film.service.FilmService;
 
@@ -50,7 +50,7 @@ public class FilmController {
     public FilmResponseDto addFilm(@Valid @RequestBody FilmRequestDto dto) {
         log.info("-> Добавление фильма: {}", dto);
 
-        Film film = FilmMapper.toDomain(dto);
+        Film film = FilmMapper.toEntity(dto);
         FilmResponseDto savedFilm = filmService.addFilm(film);
 
         log.info("-> Фильм добавлен: {}", dto);
@@ -62,7 +62,7 @@ public class FilmController {
     public FilmResponseDto updateFilm(@Validated(ValidationGroups.OnUpdate.class) @RequestBody FilmRequestDto dto) {
         log.info("-> Обновление фильма: {}", dto);
 
-        Film film = FilmMapper.toDomain(dto);
+        Film film = FilmMapper.toEntity(dto);
         FilmResponseDto response = filmService.editFilm(film);
 
         log.info("-> Фильм обновлен: {}", response);

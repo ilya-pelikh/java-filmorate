@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.film.mapper;
 
-import ru.yandex.practicum.filmorate.film.domain.Genre;
 import ru.yandex.practicum.filmorate.film.dto.GenreRequestDto;
 import ru.yandex.practicum.filmorate.film.dto.GenreResponseDto;
+import ru.yandex.practicum.filmorate.film.entity.Genre;
 
 public class GenreMapper {
-    public static Genre toDomain(GenreRequestDto dto) {
-        Genre genre = new Genre();
-
-        genre.setId(dto.getId());
+    public static Genre toEntity(GenreRequestDto dto) {
+        Genre genre = new Genre(dto.getId(), null);
 
         return genre;
     }

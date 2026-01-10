@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.common.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.social.friendship.domain.Friendship;
+import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
 
 @Primary
 @Service

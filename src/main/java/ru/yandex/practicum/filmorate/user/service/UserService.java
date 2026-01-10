@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.common.exception.ValidationException;
-import ru.yandex.practicum.filmorate.user.domain.User;
+import ru.yandex.practicum.filmorate.user.entity.User;
 import ru.yandex.practicum.filmorate.user.repository.UserRepository;
 
 import java.util.Collection;
@@ -15,10 +15,17 @@ import java.util.List;
 public class UserService {
     private final UserRepository userStorage;
 
-    private void processUser(User user) {
+    private User processUser(User user) {
+        String userName = user.getName();
         if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+            userName = user.getLogin();
         }
+        return new User(
+                user.getId(),
+                user.getEmail(),
+                user.getLogin(),
+                userName,
+                user.getBirthday());
     }
 
     public Collection<User> getAllUsers() {
@@ -34,23 +41,21 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        processUser(user);
+        user = processUser(user);
 
-        Long addedUserId = userStorage.add(user);
+        Long addedUserId = userStorage.addUser(user);
 
         return userStorage.getById(addedUserId);
     }
 
     public User editUser(Long userId, User user) throws ValidationException {
-        processUser(user);
+        user = processUser(user);
 
         if (!userStorage.checkUserForExistance(userId)) {
             throw new NotFoundException(String.format("Пользователя с id=%s не сущесуствует", userId));
         }
 
-        processUser(user);
-
-        Long editedUserId = userStorage.edit(userId, user);
+        Long editedUserId = userStorage.editUser(userId, user);
 
         return userStorage.getById(editedUserId);
     }

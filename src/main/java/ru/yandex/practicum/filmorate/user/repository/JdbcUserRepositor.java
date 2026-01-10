@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.user.domain.User;
+import ru.yandex.practicum.filmorate.user.entity.User;
 
 @Repository
 @RequiredArgsConstructor
@@ -51,6 +51,15 @@ public class JdbcUserRepositor implements UserRepository {
 
     private static final String CHECK_USER_BY_EXISTANCE_QUERY = "SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)";
 
+    private final RowMapper<User> userRowMapper = (rs, rowNum) -> {
+        return new User(
+                rs.getLong("id"),
+                rs.getString("email"),
+                rs.getString("login"),
+                rs.getString("name"),
+                rs.getDate("birthday").toLocalDate());
+    };
+
     @Override
     public User getById(long userId) throws NotFoundException {
         try {
@@ -76,7 +85,7 @@ public class JdbcUserRepositor implements UserRepository {
     }
 
     @Override
-    public Long add(User user) {
+    public Long addUser(User user) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
@@ -89,7 +98,7 @@ public class JdbcUserRepositor implements UserRepository {
     }
 
     @Override
-    public Long edit(long id, User user) {
+    public Long editUser(long id, User user) {
         jdbcTemplate.update(
                 UPDATE_USER_BY_ID_QUERY,
                 user.getEmail(),
@@ -115,17 +124,4 @@ public class JdbcUserRepositor implements UserRepository {
         ps.setString(3, user.getName());
         ps.setDate(4, user.getBirthday() != null ? Date.valueOf(user.getBirthday()) : null);
     }
-
-    private final RowMapper<User> userRowMapper = (rs, rowNum) -> {
-        User user = new User();
-
-        user.setId(rs.getLong("id"));
-        user.setEmail(rs.getString("email"));
-        user.setName(rs.getString("name"));
-        user.setLogin(rs.getString("login"));
-        user.setBirthday(rs.getDate("birthday").toLocalDate());
-
-        return user;
-    };
-
 }

@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.social.friendship.mapper;
 
-import ru.yandex.practicum.filmorate.social.friendship.domain.Friendship;
 import ru.yandex.practicum.filmorate.social.friendship.dto.FriendshipRequestDto;
 import ru.yandex.practicum.filmorate.social.friendship.dto.FriendshipResponseDto;
+import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
 
 public class FriendshipMapper {
-    public static Friendship toDomain(FriendshipRequestDto dto) {
-        return Friendship.builder()
-                .userId(dto.getUserId())
-                .friendId(dto.getFriendId())
-                .build();
+    public static Friendship toEntity(FriendshipRequestDto dto) {
+        return new Friendship(
+                dto.getUserId(),
+                dto.getFriendId());
     }
 
     public static FriendshipResponseDto toResponse(Friendship friendship) {

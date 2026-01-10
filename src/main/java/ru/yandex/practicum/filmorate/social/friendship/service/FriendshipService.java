@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.social.friendship.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.social.friendship.domain.Friendship;
 import ru.yandex.practicum.filmorate.social.friendship.dto.FriendshipResponseDto;
+import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
 import ru.yandex.practicum.filmorate.social.friendship.mapper.FriendshipMapper;
 import ru.yandex.practicum.filmorate.social.friendship.repository.FriendshipRepository;
-import ru.yandex.practicum.filmorate.user.domain.User;
+import ru.yandex.practicum.filmorate.user.entity.User;
 import ru.yandex.practicum.filmorate.user.service.UserService;
 
 import java.util.ArrayList;

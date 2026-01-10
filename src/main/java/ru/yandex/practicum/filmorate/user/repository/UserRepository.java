@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.user.domain.User;
+import ru.yandex.practicum.filmorate.user.entity.User;
 
 public interface UserRepository {
     Collection<User> getAll();
@@ -13,9 +13,9 @@ public interface UserRepository {
 
     List<User> getUsersByIDs(List<Long> ids);
 
-    Long add(User user);
+    Long addUser(User user);
 
-    Long edit(long id, User user);
+    Long editUser(long id, User user);
 
     boolean checkUserForExistance(Long userId);
 }

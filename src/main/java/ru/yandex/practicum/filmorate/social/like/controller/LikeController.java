@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.film.dto.FilmResponseDto;
-import ru.yandex.practicum.filmorate.social.like.domain.Like;
+import ru.yandex.practicum.filmorate.social.like.entity.Like;
 import ru.yandex.practicum.filmorate.social.like.service.LikeService;
 
 import java.util.Collection;

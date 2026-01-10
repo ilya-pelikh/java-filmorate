@@ -7,12 +7,12 @@ import java.util.Collection;
 
 import org.springframework.web.bind.annotation.*;
 
-import ru.yandex.practicum.filmorate.social.friendship.domain.Friendship;
 import ru.yandex.practicum.filmorate.social.friendship.dto.FriendshipRequestDto;
 import ru.yandex.practicum.filmorate.social.friendship.dto.FriendshipResponseDto;
+import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
 import ru.yandex.practicum.filmorate.social.friendship.mapper.FriendshipMapper;
 import ru.yandex.practicum.filmorate.social.friendship.service.FriendshipService;
-import ru.yandex.practicum.filmorate.user.domain.User;
+import ru.yandex.practicum.filmorate.user.entity.User;
 
 @Slf4j
 @RestController
@@ -27,7 +27,7 @@ public class FriendsController {
         FriendshipRequestDto friendshipRequestDto = FriendshipRequestDto.builder().userId(userId).friendId(friendId)
                 .build();
         FriendshipResponseDto response = friendshipService
-                .addUserToFriends(FriendshipMapper.toDomain(friendshipRequestDto));
+                .addUserToFriends(FriendshipMapper.toEntity(friendshipRequestDto));
 
         log.info("-> Пользователь добавлен в друзья {}", response);
 
@@ -42,7 +42,7 @@ public class FriendsController {
                 .build();
 
         Friendship friendship = friendshipService
-                .removeUserFromFriends(FriendshipMapper.toDomain(friendshipRequestDto));
+                .removeUserFromFriends(FriendshipMapper.toEntity(friendshipRequestDto));
 
         log.trace("Пользователь удален из друзей {} ", friendship);
 

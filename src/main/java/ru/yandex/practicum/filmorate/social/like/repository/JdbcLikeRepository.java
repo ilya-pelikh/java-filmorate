@@ -4,25 +4,18 @@ import java.util.List;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.social.like.domain.Like;
+import ru.yandex.practicum.filmorate.social.like.entity.Like;
 
 @Repository
 @RequiredArgsConstructor
 @Primary
 public class JdbcLikeRepository implements LikeRepository {
     private final JdbcTemplate jdbcTemplate;
-
-    private static final String FIND_LIKE_BY_USER_ID_AND_FILM_ID_QUERY = """
-            SELECT user_id, film_id
-            FROM user_like
-            """;
 
     private static final String INSERT_LIKE_QUERY = """
             INSERT INTO user_like (user_id, film_id)
@@ -43,15 +36,6 @@ public class JdbcLikeRepository implements LikeRepository {
             """;
 
     private static final String CHECK_LIKE_FOR_EXISTANCE_QUERY = "SELECT EXISTS(SELECT 1 FROM user_like WHERE user_id = ? AND film_id = ?)";
-
-    @Override
-    public Like findLikeById(Long likeId) throws NotFoundException {
-        try {
-            return jdbcTemplate.queryForObject(FIND_LIKE_BY_USER_ID_AND_FILM_ID_QUERY, likeRowMapper, likeId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Такого лайка не существует");
-        }
-    }
 
     @Override
     public Like addLike(Like like) {
@@ -86,12 +70,4 @@ public class JdbcLikeRepository implements LikeRepository {
                 userId, filmId);
     }
 
-    private final RowMapper<Like> likeRowMapper = (rs, rowNum) -> {
-        Long userId = rs.getLong("user_id");
-        Long filmId = rs.getLong("film_id");
-
-        Like like = Like.builder().userId(userId).filmId(filmId).build();
-
-        return like;
-    };
 }

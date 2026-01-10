@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.film.domain.Film;
-import ru.yandex.practicum.filmorate.film.domain.Genre;
-import ru.yandex.practicum.filmorate.film.domain.MPA;
+import ru.yandex.practicum.filmorate.film.entity.Film;
+import ru.yandex.practicum.filmorate.film.entity.Genre;
+import ru.yandex.practicum.filmorate.film.entity.MPA;
 
 public interface FilmRepository {
     Film findFilmById(long id) throws NotFoundException;
@@ -15,7 +15,7 @@ public interface FilmRepository {
 
     Long addFilm(Film film);
 
-    Long editFilm(long id, Film film);
+    Long editFilm(Long id, Film film);
 
     boolean checkMpaByExist(Film film);
 

@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import ru.yandex.practicum.filmorate.user.domain.User;
 import ru.yandex.practicum.filmorate.user.dto.UserRequestDto;
+import ru.yandex.practicum.filmorate.user.entity.User;
 import ru.yandex.practicum.filmorate.user.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.user.service.UserService;
 import ru.yandex.practicum.filmorate.common.validation.ValidationGroups;
@@ -41,7 +41,7 @@ public class UserController {
     public User addUser(@Valid @RequestBody UserRequestDto dto) {
         log.info("-> Добавление пользователя: {}", dto);
 
-        User user = UserMapper.toDomain(dto);
+        User user = UserMapper.toEntity(dto);
         User response = userService.addUser(user);
 
         log.info("Добавлен пользователь: {}", response);
@@ -53,7 +53,7 @@ public class UserController {
     public User updateUser(@Validated(ValidationGroups.OnUpdate.class) @RequestBody UserRequestDto dto) {
         log.info("-> Обновление пользователя: {}", dto);
 
-        User user = UserMapper.toDomain(dto);
+        User user = UserMapper.toEntity(dto);
         User response = userService.editUser(user.getId(), user);
 
         log.info("-> Обновлен пользователь {}", response);

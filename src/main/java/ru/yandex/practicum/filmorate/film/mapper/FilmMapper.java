@@ -1,32 +1,32 @@
 package ru.yandex.practicum.filmorate.film.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import ru.yandex.practicum.filmorate.film.domain.Film;
-import ru.yandex.practicum.filmorate.film.domain.Genre;
 import ru.yandex.practicum.filmorate.film.dto.FilmRequestDto;
 import ru.yandex.practicum.filmorate.film.dto.FilmResponseDto;
 import ru.yandex.practicum.filmorate.film.dto.GenreResponseDto;
+import ru.yandex.practicum.filmorate.film.entity.Film;
+import ru.yandex.practicum.filmorate.film.entity.Genre;
 
 public class FilmMapper {
-    public static Film toDomain(FilmRequestDto dto) {
-        Film film = new Film();
-
-        film.setId(dto.getId());
-        film.setName(dto.getName());
-        film.setDescription(dto.getDescription());
-        film.setReleaseDate(dto.getReleaseDate());
-        film.setDuration(dto.getDuration());
-
+    public static Film toEntity(FilmRequestDto dto) {
+        List<Genre> genreList = new ArrayList<>();
         if (dto.getGenres() != null) {
-            List<Genre> genreList = dto.getGenres().stream()
+            genreList = dto.getGenres().stream()
                     .distinct()
-                    .map(GenreMapper::toDomain)
+                    .map(GenreMapper::toEntity)
                     .toList();
-            film.setGenres(genreList);
         }
 
-        film.setMpa(MPAMapper.toDomain(dto.getMpa()));
+        Film film = new Film(
+                dto.getId(),
+                dto.getName(),
+                dto.getDescription(),
+                dto.getReleaseDate(),
+                dto.getDuration(),
+                MPAMapper.toEntity(dto.getMpa()),
+                genreList);
 
         return film;
     }

@@ -22,9 +22,9 @@ import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.film.domain.Film;
-import ru.yandex.practicum.filmorate.film.domain.Genre;
-import ru.yandex.practicum.filmorate.film.domain.MPA;
+import ru.yandex.practicum.filmorate.film.entity.Film;
+import ru.yandex.practicum.filmorate.film.entity.Genre;
+import ru.yandex.practicum.filmorate.film.entity.MPA;
 
 @Repository
 @RequiredArgsConstructor
@@ -58,8 +58,14 @@ public class JdbcFilmRepository implements FilmRepository {
     private static final String FIND_ALL_GENRES_QUERY = """
             SELECT id, name
             FROM genres
+            ORDER BY id
             """;
-    private static final String FIND_GENRE_BY_ID_QUERY = FIND_ALL_GENRES_QUERY + "WHERE id = ?";
+    private static final String FIND_GENRE_BY_ID_QUERY = """
+            SELECT id, name
+            FROM genres
+            WHERE id = ?
+            ORDER BY id
+            """;
 
     private static final String FIND_GENRES_BY_FILM_ID_QUERY = """
             SELECT g.id, g.name
@@ -79,20 +85,29 @@ public class JdbcFilmRepository implements FilmRepository {
     private static final String FIND_ALL_MPAS_QUERY = """
             SELECT id, name
             FROM mpa
+            ORDER BY id
             """;
-    private static final String FIND_MPA_BY_ID_QUERY = FIND_ALL_MPAS_QUERY + "WHERE id = ?";
+    private static final String FIND_MPA_BY_ID_QUERY = """
+            SELECT id, name
+            FROM mpa
+            WHERE id = ?
+            ORDER BY id
+            """;
 
     private static final String CHECK_FILM_BY_EXIST_QUERY = "SELECT EXISTS(SELECT 1 FROM films WHERE id = ?)";
     private static final String CHECK_MPA_BY_EXIST_QUERY = "SELECT EXISTS(SELECT 1 FROM mpa WHERE id = ?)";
     private static final String CHECK_GENRE_BY_EXIST_QUERY = "SELECT COUNT(DISTINCT id) FROM genres WHERE id IN (%s)";
 
     private final RowMapper<Film> filmRowMapper = (rs, rowNum) -> {
-        Film film = new Film();
-        film.setId(rs.getLong("id"));
-        film.setName(rs.getString("name"));
-        film.setDescription(rs.getString("description"));
-        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-        film.setDuration(rs.getInt("duration"));
+
+        Film film = new Film(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDate("release_date").toLocalDate(),
+                rs.getInt("duration"),
+                null,
+                null);
 
         return film;
     };
@@ -103,26 +118,27 @@ public class JdbcFilmRepository implements FilmRepository {
         Long mpaId = rs.getLong("mpa_id");
         String mpaName = rs.getString("mpa_name");
 
-        MPA mpa = new MPA();
-        mpa.setId(mpaId);
-        mpa.setName(mpaName);
-        film.setMpa(mpa);
+        return new Film(
+                film.getId(),
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                new MPA(mpaId, mpaName),
+                film.getGenres());
 
-        return film;
     };
 
     private final RowMapper<Genre> genreRowMapper = (rs, rowNum) -> {
-        Genre genre = new Genre();
-        genre.setId(rs.getLong("id"));
-        genre.setName(rs.getString("name"));
+        Genre genre = new Genre(
+                rs.getLong("id"),
+                rs.getString("name"));
+
         return genre;
     };
 
     private final RowMapper<MPA> mpaMapper = (rs, rowNum) -> {
-        MPA mpa = new MPA();
-        mpa.setId(rs.getLong("id"));
-        mpa.setName(rs.getString("name"));
-        return mpa;
+        return new MPA(rs.getLong("id"), rs.getString("name"));
     };
 
     private final ResultSetExtractor<Map<Long, List<Genre>>> genreByFilmMapper = rs -> {
@@ -139,15 +155,19 @@ public class JdbcFilmRepository implements FilmRepository {
     public Film findFilmById(long id) throws NotFoundException {
         try {
             Film film = jdbcTemplate.queryForObject(FIND_FILM_BY_ID_QUERY, filmWithMpaRowMapper, id);
-            if (film != null) {
-                List<Genre> genres = jdbcTemplate.query(
-                        FIND_GENRES_BY_FILM_ID_QUERY,
-                        genreRowMapper,
-                        id);
-                film.setGenres(new ArrayList<>(genres));
-            }
+            List<Genre> genres = jdbcTemplate.query(
+                    FIND_GENRES_BY_FILM_ID_QUERY,
+                    genreRowMapper,
+                    id);
 
-            return film;
+            return new Film(
+                    film.getId(),
+                    film.getName(),
+                    film.getDescription(),
+                    film.getReleaseDate(),
+                    film.getDuration(),
+                    film.getMpa(),
+                    genres);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException(String.format("Фильм с id = %s не найден", id));
         }
@@ -168,7 +188,7 @@ public class JdbcFilmRepository implements FilmRepository {
     }
 
     @Override
-    public Long editFilm(long id, Film film) {
+    public Long editFilm(Long id, Film film) {
         jdbcTemplate.update(
                 UPDATE_FILM_BY_ID_QUERY,
                 film.getName(),
@@ -195,11 +215,17 @@ public class JdbcFilmRepository implements FilmRepository {
 
         Map<Long, List<Genre>> genres = jdbcTemplate.query(sql, genreByFilmMapper, filmIds.toArray());
 
-        films.stream().forEach(film -> {
-            film.setGenres(genres.getOrDefault(film.getId(), Collections.emptyList()));
-        });
+        return films.stream().map(film -> {
+            return new Film(
+                    film.getId(),
+                    film.getName(),
+                    film.getDescription(),
+                    film.getReleaseDate(),
+                    film.getDuration(),
+                    film.getMpa(),
+                    genres.getOrDefault(film.getId(), Collections.emptyList()));
+        }).toList();
 
-        return films;
     }
 
     public boolean checkMpaByExist(Film film) {
@@ -217,6 +243,10 @@ public class JdbcFilmRepository implements FilmRepository {
     }
 
     public boolean checkGenreByExist(Film film) {
+        if (film.getGenres() == null) {
+            return false;
+        }
+
         List<Long> ids = film.getGenres().stream().map(genre -> genre.getId()).toList();
         String placeholders = ids.stream()
                 .map(obj -> "?")
@@ -297,15 +327,22 @@ public class JdbcFilmRepository implements FilmRepository {
 
         Map<Long, List<Genre>> genres = jdbcTemplate.query(sql, genreByFilmMapper, filmIds.toArray());
 
-        films.stream().forEach(film -> {
-            film.setGenres(genres.getOrDefault(film.getId(), Collections.emptyList()));
-        });
+        List<Film> mappedFilms = films.stream().map(film -> {
+            return new Film(
+                    film.getId(),
+                    film.getName(),
+                    film.getDescription(),
+                    film.getReleaseDate(),
+                    film.getDuration(),
+                    film.getMpa(),
+                    genres.getOrDefault(film.getId(), Collections.emptyList()));
+        }).toList();
 
         List<Film> result = new ArrayList<>();
 
         for (int i = 0; i < ids.size(); i++) {
             Long sortedId = ids.get(i);
-            for (Film film : films) {
+            for (Film film : mappedFilms) {
                 if (film.getId().equals(sortedId)) {
                     result.add(film);
                     continue;

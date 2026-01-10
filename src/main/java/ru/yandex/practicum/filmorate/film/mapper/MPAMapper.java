@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.film.mapper;
 
-import ru.yandex.practicum.filmorate.film.domain.MPA;
 import ru.yandex.practicum.filmorate.film.dto.MPARequestDto;
 import ru.yandex.practicum.filmorate.film.dto.MPAResponseDto;
+import ru.yandex.practicum.filmorate.film.entity.MPA;
 
 public class MPAMapper {
-    public static MPA toDomain(MPARequestDto dto) {
-        MPA mpa = new MPA();
-
-        mpa.setId(dto.getId());
+    public static MPA toEntity(MPARequestDto dto) {
+        MPA mpa = new MPA(dto.getId(), null);
 
         return mpa;
     }
