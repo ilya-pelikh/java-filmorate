@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.social.like.entity.Like;
 
 @Repository
 @RequiredArgsConstructor
@@ -38,24 +37,22 @@ public class JdbcLikeRepository implements LikeRepository {
     private static final String CHECK_LIKE_FOR_EXISTANCE_QUERY = "SELECT EXISTS(SELECT 1 FROM user_like WHERE user_id = ? AND film_id = ?)";
 
     @Override
-    public Like addLike(Like like) {
+    public void addLike(long userId, long filmId) {
         try {
-            jdbcTemplate.update(INSERT_LIKE_QUERY, like.getUserId(), like.getFilmId());
+            jdbcTemplate.update(INSERT_LIKE_QUERY, userId, filmId);
         } catch (DuplicateKeyException e) {
             throw new NotFoundException("Не удалось создать запись");
         }
-        return like;
     }
 
     @Override
-    public Like removeLike(Like like) throws NotFoundException {
-        int updatedRows = jdbcTemplate.update(DELETE_LIKE_BY_ID_QUERY, like.getUserId(), like.getFilmId());
+    public void removeLike(long userId, long filmId) throws NotFoundException {
+        int updatedRows = jdbcTemplate.update(DELETE_LIKE_BY_ID_QUERY, userId, filmId);
 
         if (updatedRows == 0) {
             throw new NotFoundException("Такого лайка не существует");
         }
 
-        return like;
     }
 
     @Override

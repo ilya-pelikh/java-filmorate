@@ -55,6 +55,10 @@ public class JdbcFilmRepository implements FilmRepository {
             INSERT INTO film_genre (film_id, genre_id)
             VALUES (?, ?)
             """;
+    private static final String DELETE_FILM_GENRE_QUERY = """
+            DELETE FROM film_genre
+            WHERE film_id = ?
+            """;
     private static final String FIND_ALL_GENRES_QUERY = """
             SELECT id, name
             FROM genres
@@ -175,7 +179,7 @@ public class JdbcFilmRepository implements FilmRepository {
     }
 
     @Override
-    public Long addFilm(Film film) {
+    public Film addFilm(Film film) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
@@ -184,11 +188,22 @@ public class JdbcFilmRepository implements FilmRepository {
             return ps;
         }, keyHolder);
 
-        return keyHolder.getKeyAs(Long.class);
+        Long filmId = keyHolder.getKeyAs(Long.class);
+
+        addGenresToFilm(filmId, film.getGenres());
+
+        return new Film(
+                filmId,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa(),
+                film.getGenres());
     }
 
     @Override
-    public Long editFilm(Long id, Film film) {
+    public Film editFilm(Long filmId, Film film) {
         jdbcTemplate.update(
                 UPDATE_FILM_BY_ID_QUERY,
                 film.getName(),
@@ -196,9 +211,19 @@ public class JdbcFilmRepository implements FilmRepository {
                 Date.valueOf(film.getReleaseDate()),
                 film.getDuration(),
                 film.getMpa().getId(),
-                id);
+                filmId);
 
-        return id;
+        removeGenresToFilm(filmId);
+
+        addGenresToFilm(filmId, film.getGenres());
+
+        return new Film(filmId,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa(),
+                film.getGenres());
     }
 
     @Override
@@ -270,6 +295,10 @@ public class JdbcFilmRepository implements FilmRepository {
                 .collect(Collectors.toList());
 
         jdbcTemplate.batchUpdate(INSERT_FILM_GENRE_QUERY, batchArgs);
+    }
+
+    public void removeGenresToFilm(Long filmId) {
+        jdbcTemplate.update(DELETE_FILM_GENRE_QUERY, filmId);
     }
 
     private void setFilmParameters(PreparedStatement ps, Film film) throws SQLException {

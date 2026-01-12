@@ -3,12 +3,9 @@ package ru.yandex.practicum.filmorate.social.friendship.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.social.friendship.dto.FriendshipResponseDto;
-import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
-import ru.yandex.practicum.filmorate.social.friendship.mapper.FriendshipMapper;
 import ru.yandex.practicum.filmorate.social.friendship.repository.FriendshipRepository;
 import ru.yandex.practicum.filmorate.user.entity.User;
-import ru.yandex.practicum.filmorate.user.service.UserService;
+import ru.yandex.practicum.filmorate.user.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,34 +14,30 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FriendshipService {
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     private final FriendshipRepository friendshipStorage;
 
-    public FriendshipResponseDto addUserToFriends(Friendship friendship) {
-        userService.getUserById(friendship.getUserId());
-        userService.getUserById(friendship.getFriendId());
+    public void addUserToFriends(Long userId, Long friendId) {
+        userRepository.getById(userId);
+        userRepository.getById(friendId);
 
-        friendshipStorage.addFriendship(friendship);
-
-        return FriendshipMapper.toResponse(friendship);
+        friendshipStorage.addFriendship(userId, friendId);
     }
 
-    public Friendship removeUserFromFriends(Friendship friendship) {
-        userService.getUserById(friendship.getUserId());
-        userService.getUserById(friendship.getFriendId());
+    public void removeUserFromFriends(Long userId, Long friendId) {
+        userRepository.getById(userId);
+        userRepository.getById(friendId);
 
-        friendshipStorage.removeFriendship(friendship);
-
-        return friendship;
+        friendshipStorage.removeFriendship(userId, friendId);
     }
 
     public Collection<User> getFriendsByUserId(Long userId) {
-        userService.getUserById(userId);
+        userRepository.getById(userId);
 
         List<Long> friendsIds = friendshipStorage.getFriendIdsForUserById(userId);
 
-        List<User> response = userService.getUsersByIDs(friendsIds);
+        List<User> response = userRepository.getUsersByIDs(friendsIds);
 
         return response;
     }
@@ -57,7 +50,7 @@ public class FriendshipService {
 
         userFriendsCopy.retainAll(friendsForFriendIds);
 
-        List<User> response = userService.getUsersByIDs(userFriendsCopy);
+        List<User> response = userRepository.getUsersByIDs(userFriendsCopy);
 
         return response;
     }

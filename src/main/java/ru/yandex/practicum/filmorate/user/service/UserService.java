@@ -43,9 +43,8 @@ public class UserService {
     public User addUser(User user) {
         user = processUser(user);
 
-        Long addedUserId = userStorage.addUser(user);
+        return userStorage.addUser(user);
 
-        return userStorage.getById(addedUserId);
     }
 
     public User editUser(Long userId, User user) throws ValidationException {
@@ -55,9 +54,7 @@ public class UserService {
             throw new NotFoundException(String.format("Пользователя с id=%s не сущесуствует", userId));
         }
 
-        Long editedUserId = userStorage.editUser(userId, user);
-
-        return userStorage.getById(editedUserId);
+        return userStorage.editUser(userId, user);
     }
 
     public boolean checkUserForExistance(Long userId) {

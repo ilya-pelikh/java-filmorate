@@ -13,9 +13,9 @@ public interface FilmRepository {
 
     Collection<Film> findAllFilms();
 
-    Long addFilm(Film film);
+    Film addFilm(Film film);
 
-    Long editFilm(Long id, Film film);
+    Film editFilm(Long id, Film film);
 
     boolean checkMpaByExist(Film film);
 

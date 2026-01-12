@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.common.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
 
 @Primary
 @Service
@@ -32,25 +31,18 @@ public class JdbcFriendshipRepository implements FriendshipRepository {
             """;
 
     @Override
-    public Friendship addFriendship(Friendship friendship) {
+    public void addFriendship(Long userId, Long friendId) {
         try {
-            jdbcTemplate.update(INSERT_FRIENDSHIP_QUERY, friendship.getUserId(), friendship.getFriendId());
+            jdbcTemplate.update(INSERT_FRIENDSHIP_QUERY, userId, friendId);
         } catch (DuplicateKeyException e) {
-            throw new AlreadyExistException(String.format(
-                    "Пользователи с id %s и %s уже являются друзьями",
-                    friendship.getUserId(),
-                    friendship.getFriendId()));
+            throw new AlreadyExistException("Пользователи уже являются друзьями");
         }
 
-        return friendship;
     }
 
     @Override
-    public Friendship removeFriendship(Friendship friendship) {
-        jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, friendship.getUserId(),
-                friendship.getFriendId());
-
-        return friendship;
+    public void removeFriendship(Long userId, Long friendId) {
+        jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, userId, friendId);
     }
 
     @Override

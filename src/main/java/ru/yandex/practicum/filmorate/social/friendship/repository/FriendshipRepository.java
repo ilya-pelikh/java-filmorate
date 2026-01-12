@@ -3,12 +3,12 @@ package ru.yandex.practicum.filmorate.social.friendship.repository;
 import java.util.List;
 
 import ru.yandex.practicum.filmorate.common.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
+import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
 
 public interface FriendshipRepository {
-    Friendship addFriendship(Friendship friendship) throws AlreadyExistException;
+    void addFriendship(Long userId, Long friendId) throws AlreadyExistException;
 
-    Friendship removeFriendship(Friendship friendship);
+    void removeFriendship(Long userId, Long friendId) throws NotFoundException;
 
     List<Long> getFriendIdsForUserById(Long id);
 }

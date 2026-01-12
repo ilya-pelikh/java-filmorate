@@ -13,9 +13,9 @@ public interface UserRepository {
 
     List<User> getUsersByIDs(List<Long> ids);
 
-    Long addUser(User user);
+    User addUser(User user);
 
-    Long editUser(long id, User user);
+    User editUser(long id, User user);
 
     boolean checkUserForExistance(Long userId);
 }

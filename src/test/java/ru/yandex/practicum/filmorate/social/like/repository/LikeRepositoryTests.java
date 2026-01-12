@@ -12,16 +12,10 @@ import ru.yandex.practicum.filmorate.film.entity.Film;
 import ru.yandex.practicum.filmorate.film.entity.Genre;
 import ru.yandex.practicum.filmorate.film.entity.MPA;
 import ru.yandex.practicum.filmorate.film.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.social.like.entity.Like;
 import ru.yandex.practicum.filmorate.user.entity.User;
 import ru.yandex.practicum.filmorate.user.repository.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-// public interface LikeRepository {
-
-//     List<Long> getLikesByMaximum(int limit);
-// }
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -47,7 +41,7 @@ public class LikeRepositoryTests {
                 "Джек",
                 LocalDate.of(2012, 12, 12));
 
-        Long indexOfUser = userRepository.addUser(user1);
+        User addedUser = userRepository.addUser(user1);
 
         MPA mpa = new MPA(1L, "G");
         Genre genre = new Genre(1L, "Комедия");
@@ -59,17 +53,15 @@ public class LikeRepositoryTests {
                 mpa,
                 List.of(genre));
 
-        Long indexOfFilm = filmRepository.addFilm(film);
+        Film addedFilm = filmRepository.addFilm(film);
 
-        Like likeToAdd = new Like(indexOfUser, indexOfFilm);
+        likeRepository.addLike(addedUser.getId(), addedFilm.getId());
 
-        likeRepository.addLike(likeToAdd);
+        assertThat(likeRepository.checkLikeForExistance(addedUser.getId(), addedFilm.getId())).isEqualTo(true);
 
-        assertThat(likeRepository.checkLikeForExistance(indexOfUser, indexOfFilm)).isEqualTo(true);
+        likeRepository.removeLike(addedUser.getId(), addedFilm.getId());
 
-        likeRepository.removeLike(likeToAdd);
-
-        assertThat(likeRepository.checkLikeForExistance(indexOfUser, indexOfFilm)).isEqualTo(false);
+        assertThat(likeRepository.checkLikeForExistance(addedUser.getId(), addedFilm.getId())).isEqualTo(false);
     }
 
     @Test
@@ -93,9 +85,9 @@ public class LikeRepositoryTests {
                 "Джек",
                 LocalDate.of(2012, 12, 12));
 
-        Long indexOfUser1 = userRepository.addUser(user1);
-        Long indexOfUser2 = userRepository.addUser(user2);
-        Long indexOfUser3 = userRepository.addUser(user3);
+        User addedUser1 = userRepository.addUser(user1);
+        User addedUser2 = userRepository.addUser(user2);
+        User addedUser3 = userRepository.addUser(user3);
 
         MPA mpa = new MPA(1L, "G");
         Genre genre = new Genre(1L, "Комедия");
@@ -106,7 +98,7 @@ public class LikeRepositoryTests {
                 LocalDate.of(2012, 12, 12), 130,
                 mpa,
                 List.of(genre));
-        Long indexOfFilm1 = filmRepository.addFilm(film1);
+        Film addedFilm1 = filmRepository.addFilm(film1);
 
         Film film2 = new Film(
                 null,
@@ -115,7 +107,7 @@ public class LikeRepositoryTests {
                 LocalDate.of(2012, 12, 12), 130,
                 mpa,
                 List.of(genre));
-        Long indexOfFilm2 = filmRepository.addFilm(film2);
+        Film addedFilm2 = filmRepository.addFilm(film2);
 
         Film film3 = new Film(
                 null,
@@ -124,25 +116,20 @@ public class LikeRepositoryTests {
                 LocalDate.of(2012, 12, 12), 130,
                 mpa,
                 List.of(genre));
-        Long indexOfFilm3 = filmRepository.addFilm(film3);
 
-        Like likeToAdd1 = new Like(indexOfUser1, indexOfFilm3);
-        likeRepository.addLike(likeToAdd1);
-        Like likeToAdd2 = new Like(indexOfUser1, indexOfFilm2);
-        likeRepository.addLike(likeToAdd2);
-        Like likeToAdd3 = new Like(indexOfUser1, indexOfFilm1);
-        likeRepository.addLike(likeToAdd3);
+        Film addedFilm3 = filmRepository.addFilm(film3);
 
-        Like likeToAdd4 = new Like(indexOfUser2, indexOfFilm3);
-        likeRepository.addLike(likeToAdd4);
-        Like likeToAdd5 = new Like(indexOfUser2, indexOfFilm2);
-        likeRepository.addLike(likeToAdd5);
+        likeRepository.addLike(addedUser1.getId(), addedFilm3.getId());
+        likeRepository.addLike(addedUser1.getId(), addedFilm2.getId());
+        likeRepository.addLike(addedUser1.getId(), addedFilm1.getId());
 
-        Like likeToAdd6 = new Like(indexOfUser3, indexOfFilm3);
-        likeRepository.addLike(likeToAdd6);
+        likeRepository.addLike(addedUser2.getId(), addedFilm3.getId());
+        likeRepository.addLike(addedUser2.getId(), addedFilm2.getId());
+
+        likeRepository.addLike(addedUser3.getId(), addedFilm3.getId());
 
         List<Long> filmIds = likeRepository.getLikesByMaximum(2);
 
-        assertThat(filmIds).isEqualTo(List.of(indexOfFilm3, indexOfFilm2));
+        assertThat(filmIds).isEqualTo(List.of(addedFilm3.getId(), addedFilm2.getId()));
     }
 }

@@ -37,13 +37,9 @@ class FilmRepositoryTests {
                 mpa,
                 List.of(genre));
 
-        Long index = repository.addFilm(film);
+        Film addedFilm = repository.addFilm(film);
 
-        repository.addGenresToFilm(index, film.getGenres());
-
-        Film addedFilm = repository.findFilmById(index);
-
-        assertThat(addedFilm).isEqualTo(film);
+        assertThat(repository.findFilmById(addedFilm.getId())).isEqualTo(film);
     }
 
     @Test
@@ -67,13 +63,11 @@ class FilmRepositoryTests {
                 mpa,
                 List.of(genre));
 
-        Long filmID1 = repository.addFilm(film1);
-        repository.addGenresToFilm(filmID1, film1.getGenres());
+        Film addedFilm1 = repository.addFilm(film1);
 
-        Long filmID2 = repository.addFilm(film2);
-        repository.addGenresToFilm(filmID2, film2.getGenres());
+        Film addedFilm2 = repository.addFilm(film2);
 
-        List<Film> expected = List.of(film1, film2);
+        List<Film> expected = List.of(addedFilm1, addedFilm2);
 
         assertThat(repository.findAllFilms()).isEqualTo(expected);
     }
@@ -89,21 +83,19 @@ class FilmRepositoryTests {
                 mpa,
                 List.of());
 
-        Long index = repository.addFilm(film);
-
-        repository.addGenresToFilm(index, film.getGenres());
+        Film addedFilm = repository.addFilm(film);
 
         Film film2 = new Film(
-                index,
+                addedFilm.getId(),
                 "Джек Водогрей 2",
                 "Про пирата",
                 LocalDate.of(2012, 12, 12), 130,
                 mpa,
                 List.of());
 
-        repository.editFilm(index, film2);
+        repository.editFilm(addedFilm.getId(), film2);
 
-        assertThat(repository.findFilmById(index)).isEqualTo(film2);
+        assertThat(repository.findFilmById(addedFilm.getId())).isEqualTo(film2);
     }
 
     @Test
@@ -135,32 +127,9 @@ class FilmRepositoryTests {
                 mpa,
                 List.of());
 
-        Long index = repository.addFilm(film);
+        Film addedFilm = repository.addFilm(film);
 
-        Film addedFilm = repository.findFilmById(index);
-
-        boolean isGenreExist = repository.checkGenreByExist(addedFilm);
-        assertThat(isGenreExist).isEqualTo(true);
-    }
-
-    @Test
-    public void filmRepository_addGenresToFilm() {
-        MPA mpa = new MPA(1L, "G");
-        Genre genre = new Genre(1L, "Комедия");
-        Film film = new Film(
-                null,
-                "Джек Водогрей",
-                "Про пирата",
-                LocalDate.of(2012, 12, 12), 130,
-                mpa,
-                List.of());
-
-        Long index = repository.addFilm(film);
-        repository.addGenresToFilm(index, List.of(genre));
-
-        Film addedFilm = repository.findFilmById(index);
-
-        boolean isGenreExist = repository.checkGenreByExist(addedFilm);
+        boolean isGenreExist = repository.checkGenreByExist(repository.findFilmById(addedFilm.getId()));
         assertThat(isGenreExist).isEqualTo(true);
     }
 
@@ -220,8 +189,8 @@ class FilmRepositoryTests {
                 mpa,
                 List.of());
 
-        Long index = repository.addFilm(film);
-        assertThat(repository.checkFilmForExistance(index)).isEqualTo(true);
+        Film addedFilm = repository.addFilm(film);
+        assertThat(repository.checkFilmForExistance(addedFilm.getId())).isEqualTo(true);
     }
 
     @Test
@@ -244,11 +213,11 @@ class FilmRepositoryTests {
                 mpa,
                 List.of());
 
-        Long filmID1 = repository.addFilm(film1);
-        Long filmID2 = repository.addFilm(film2);
+        Film addedFilm1 = repository.addFilm(film1);
+        Film addedFilm2 = repository.addFilm(film2);
 
         List<Film> expected = List.of(film1, film2);
 
-        assertThat(repository.getFilmsByIDs(List.of(filmID1, filmID2))).isEqualTo(expected);
+        assertThat(repository.getFilmsByIDs(List.of(addedFilm1.getId(), addedFilm2.getId()))).isEqualTo(expected);
     }
 }

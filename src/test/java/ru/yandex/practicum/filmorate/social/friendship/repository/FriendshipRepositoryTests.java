@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import ru.yandex.practicum.filmorate.social.friendship.entity.Friendship;
 import ru.yandex.practicum.filmorate.user.entity.User;
 import ru.yandex.practicum.filmorate.user.repository.UserRepository;
 
@@ -40,14 +39,12 @@ public class FriendshipRepositoryTests {
                 "Джек",
                 LocalDate.of(2012, 12, 12));
 
-        Long index1 = userRepository.addUser(user1);
-        Long index2 = userRepository.addUser(user2);
+        User addedUser1 = userRepository.addUser(user1);
+        User addedUser2 = userRepository.addUser(user2);
 
-        Friendship friendship = new Friendship(index1, index2);
+        friendshipRepository.addFriendship(addedUser1.getId(), addedUser2.getId());
 
-        friendshipRepository.addFriendship(friendship);
-
-        assertThat(friendshipRepository.getFriendIdsForUserById(index1)).isNotEmpty();
+        assertThat(friendshipRepository.getFriendIdsForUserById(addedUser1.getId())).isNotEmpty();
     }
 
     @Test
@@ -65,16 +62,14 @@ public class FriendshipRepositoryTests {
                 "Джек",
                 LocalDate.of(2012, 12, 12));
 
-        Long index1 = userRepository.addUser(user1);
-        Long index2 = userRepository.addUser(user2);
+        User addedUser1 = userRepository.addUser(user1);
+        User addedUser2 = userRepository.addUser(user2);
 
-        Friendship friendship = new Friendship(index1, index2);
+        friendshipRepository.addFriendship(addedUser1.getId(), addedUser2.getId());
 
-        friendshipRepository.addFriendship(friendship);
+        friendshipRepository.removeFriendship(addedUser1.getId(), addedUser2.getId());
 
-        friendshipRepository.removeFriendship(friendship);
-
-        assertThat(friendshipRepository.getFriendIdsForUserById(index1)).isEmpty();
+        assertThat(friendshipRepository.getFriendIdsForUserById(addedUser1.getId())).isEmpty();
     }
 
 }

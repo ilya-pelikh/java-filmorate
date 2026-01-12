@@ -2,12 +2,10 @@ package ru.yandex.practicum.filmorate.social.like.repository;
 
 import java.util.List;
 
-import ru.yandex.practicum.filmorate.social.like.entity.Like;
-
 public interface LikeRepository {
-    Like addLike(Like like);
+    void addLike(long userId, long filmId);
 
-    Like removeLike(Like like);
+    void removeLike(long userId, long filmId);
 
     boolean checkLikeForExistance(Long userId, Long filmId);
 

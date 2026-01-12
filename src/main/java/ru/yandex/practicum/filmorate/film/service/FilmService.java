@@ -55,25 +55,19 @@ public class FilmService {
             throw new NotFoundException("Жанра с одним из id не существует");
         }
 
-        Long filmId = storage.addFilm(film);
-
-        storage.addGenresToFilm(filmId, film.getGenres());
-
-        Film addedFilm = storage.findFilmById(filmId);
+        Film addedFilm = storage.addFilm(film);
 
         return FilmMapper.toResponse(addedFilm);
     }
 
     public FilmResponseDto editFilm(Film film) throws ValidationException, NotFoundException {
-        boolean isEditedFilmExist = storage.findFilmById(film.getId()) != null;
+        boolean isEditedFilmExist = storage.checkFilmForExistance(film.getId());
 
         if (!isEditedFilmExist) {
             throw new NotFoundException(String.format("Фильма с id = %s не существует", film.getId()));
         }
 
-        storage.editFilm(film.getId(), film);
-
-        Film editedFilm = storage.findFilmById(film.getId());
+        Film editedFilm = storage.editFilm(film.getId(), film);
 
         return FilmMapper.toResponse(editedFilm);
     }

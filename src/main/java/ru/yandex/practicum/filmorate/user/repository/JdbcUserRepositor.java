@@ -85,7 +85,7 @@ public class JdbcUserRepositor implements UserRepository {
     }
 
     @Override
-    public Long addUser(User user) {
+    public User addUser(User user) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
@@ -94,11 +94,17 @@ public class JdbcUserRepositor implements UserRepository {
             return ps;
         }, keyHolder);
 
-        return keyHolder.getKeyAs(Long.class);
+        Long userId = keyHolder.getKeyAs(Long.class);
+
+        return new User(userId,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday());
     }
 
     @Override
-    public Long editUser(long id, User user) {
+    public User editUser(long id, User user) {
         jdbcTemplate.update(
                 UPDATE_USER_BY_ID_QUERY,
                 user.getEmail(),
@@ -107,7 +113,11 @@ public class JdbcUserRepositor implements UserRepository {
                 Date.valueOf(user.getBirthday()),
                 id);
 
-        return id;
+        return new User(id,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday());
     }
 
     @Override

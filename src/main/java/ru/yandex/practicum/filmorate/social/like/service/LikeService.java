@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.common.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.common.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.film.dto.FilmResponseDto;
 import ru.yandex.practicum.filmorate.film.service.FilmService;
-import ru.yandex.practicum.filmorate.social.like.entity.Like;
 import ru.yandex.practicum.filmorate.social.like.repository.LikeRepository;
 import ru.yandex.practicum.filmorate.user.service.UserService;
 
@@ -20,7 +19,7 @@ public class LikeService {
     private final FilmService filmService;
     private final UserService userService;
 
-    public Like addLikeToFilmByUser(long userId, long filmId) {
+    public void addLikeToFilmByUser(long userId, long filmId) {
         Boolean isUserExist = userService.checkUserForExistance(userId);
 
         if (!isUserExist) {
@@ -38,14 +37,10 @@ public class LikeService {
             throw new AlreadyExistException("Лайк уже был поставлен");
         }
 
-        Like likeToAdd = new Like(userId, filmId);
-
-        Like addedLike = likeRepository.addLike(likeToAdd);
-
-        return addedLike;
+        likeRepository.addLike(userId, filmId);
     }
 
-    public Like removeLikeFromFilmByUser(long userId, long filmId) {
+    public void removeLikeFromFilmByUser(long userId, long filmId) {
         Boolean isUserExist = userService.checkUserForExistance(userId);
 
         if (!isUserExist) {
@@ -63,11 +58,7 @@ public class LikeService {
             throw new AlreadyExistException("Лайк уже был поставлен");
         }
 
-        Like removedLike = new Like(userId, filmId);
-
-        likeRepository.removeLike(removedLike);
-
-        return removedLike;
+        likeRepository.removeLike(userId, filmId);
     }
 
     public Collection<FilmResponseDto> getFilmsByPopularity(Integer count) {

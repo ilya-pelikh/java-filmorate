@@ -32,7 +32,7 @@ class UserRepositoryTests {
                                 "Джек",
                                 LocalDate.of(2012, 12, 12));
 
-                Long index1 = userRepository.addUser(user1);
+                User addedUser = userRepository.addUser(user1);
 
                 User user2 = new User(
                                 null,
@@ -41,11 +41,9 @@ class UserRepositoryTests {
                                 "Джек",
                                 LocalDate.of(2012, 12, 12));
 
-                Long index2 = userRepository.editUser(index1, user2);
+                User editedUser = userRepository.editUser(addedUser.getId(), user2);
 
-                User editedUser = userRepository.getById(index2);
-
-                assertThat(user2).isEqualTo(editedUser);
+                assertThat(user2).isEqualTo(userRepository.getById(editedUser.getId()));
         }
 
         @Test
@@ -57,11 +55,9 @@ class UserRepositoryTests {
                                 "Джек",
                                 LocalDate.of(2012, 12, 12));
 
-                Long index = userRepository.addUser(user);
+                User addedUser = userRepository.addUser(user);
 
-                User addedUser = userRepository.getById(index);
-
-                assertThat(user).isEqualTo(addedUser);
+                assertThat(user).isEqualTo(userRepository.getById(addedUser.getId()));
         }
 
         @Test
@@ -79,12 +75,11 @@ class UserRepositoryTests {
                                 "Джек",
                                 LocalDate.of(2012, 12, 12));
 
-                Long index1 = userRepository.addUser(user1);
-                Long index2 = userRepository.addUser(user2);
+                User addedUser1 = userRepository.addUser(user1);
+                User addedUser2 = userRepository.addUser(user2);
 
-                List<User> addedUser1 = userRepository.getUsersByIDs(List.of(index1, index2));
-
-                assertThat(List.of(user1, user2)).isEqualTo(addedUser1);
+                assertThat(List.of(user1, user2)).isEqualTo(
+                                userRepository.getUsersByIDs(List.of(addedUser1.getId(), addedUser2.getId())));
         }
 
         @Test
@@ -96,9 +91,9 @@ class UserRepositoryTests {
                                 "Джек",
                                 LocalDate.of(2012, 12, 12));
 
-                Long index1 = userRepository.addUser(user1);
+                User addedUser = userRepository.addUser(user1);
 
-                boolean isUserExist = userRepository.checkUserForExistance(index1);
+                boolean isUserExist = userRepository.checkUserForExistance(addedUser.getId());
 
                 assertThat(isUserExist).isEqualTo(true);
         }
